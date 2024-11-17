@@ -7,6 +7,9 @@ import os
 from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
+
 
 app = Flask(__name__)
 
@@ -24,7 +27,8 @@ session.mount("https://", adapter)
 # Cache weather data for 5 minutes - becomes max runtime
 @lru_cache(maxsize=100)
 def get_cached_temperature(city, timestamp):
-    api_key = "a335bd2b726341bc9ef24526241711"  # Replace with your WeatherAPI key
+    api_key = os.getenv("WEATHER_API_KEY")  # Replace with your WeatherAPI key
+    print(f"Weather API Key: {api_key}") 
     url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={city}&aqi=no"  # "aqi=no" to exclude air quality data
     response = requests.get(url)
     
