@@ -8,12 +8,11 @@ from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from dotenv import load_dotenv
-load_dotenv()  # Load environment variables from .env file
+load_dotenv()
 
 
 app = Flask(__name__)
 
-# Configure request session with retry strategy and connection pooling
 session = requests.Session()
 retry_strategy = Retry(
     total=3,
@@ -27,14 +26,14 @@ session.mount("https://", adapter)
 # Cache weather data for 5 minutes - becomes max runtime
 @lru_cache(maxsize=100)
 def get_cached_temperature(city, timestamp):
-    api_key = os.getenv("WEATHER_API_KEY")  # Replace with your WeatherAPI key
+    api_key = os.getenv("WEATHER_API_KEY") 
     print(f"Weather API Key: {api_key}") 
-    url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={city}&aqi=no"  # "aqi=no" to exclude air quality data
+    url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={city}&aqi=no"  
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
-        temperature = data.get('current', {}).get('temp_c', None)  # Get temperature in Celsius
+        temperature = data.get('current', {}).get('temp_c', None)
         if temperature is not None:
             return temperature
         else:
@@ -44,7 +43,7 @@ def get_cached_temperature(city, timestamp):
 
 # Initialize Bedrock runtime client
 def get_nearby_cities(city, radius_miles):
-    if not (0 < radius_miles <= 100):  # Add reasonable limits
+    if not (0 < radius_miles <= 100):  
         return ["Invalid radius. Please enter a value between 1 and 100 miles."]
 
     user_prompt = f"Please list cities that are within {radius_miles} miles of {city}"
@@ -102,7 +101,7 @@ def index():
         try:
             too_hot = int(request.form.get("tooHot", ""))
             too_cold = int(request.form.get("tooCold", ""))
-            radius_miles = int(request.form.get("radius", "5"))  # Get radius input from the form, default is 5 miles
+            radius_miles = int(request.form.get("radius", ""))
         except ValueError:
             return render_template("index.html", error="Please enter valid temperature values for Too Hot, Too Cold, and radius.")
 
@@ -116,7 +115,7 @@ def index():
             if too_cold <= temperature <= too_hot:
                 valid_city = f"The temperature in {city} is {temperature}°C, and it is within the acceptable range."
             else:
-                nearby_cities = get_nearby_cities(city, radius_miles)  # Use inputted radius
+                nearby_cities = get_nearby_cities(city, radius_miles)
                 for nearby_city in nearby_cities:
                     temp = get_cached_temperature(nearby_city, timestamp)
                     if temp is not None and too_cold <= temp <= too_hot:
@@ -126,7 +125,6 @@ def index():
                 if valid_city is None:
                     valid_city = "No cities in the radius work."
 
-                # Create a list of city-temperature pairs for display in HTML
                 temperature_info = []
                 for nearby_city in nearby_cities:
                     temp = get_cached_temperature(nearby_city, timestamp)
@@ -145,4 +143,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
