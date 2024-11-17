@@ -27,7 +27,8 @@ bedrock_client = boto3.client('bedrock', region_name='us-west-2')  # Replace wit
 
 # Function to query Bedrock for nearby cities within the specified radius
 def get_nearby_cities(city, radius_miles):
-    prompt = f"Please list cities that are within {radius_miles} miles of {city}."
+    #prompt = f"Please list cities that are within {radius_miles} miles of {city}."
+    prompt = "List five cities in California.";
 
     try:
         # Make request to Bedrock
@@ -42,6 +43,7 @@ def get_nearby_cities(city, radius_miles):
         # Process the response
         response_body = response['body'].read().decode('utf-8')
         response_json = json.loads(response_body)
+        print(json.dumps(response_json, indent=4))  # Pretty print JSON with indentation
         nearby_cities = response_json.get('choices', [{}])[0].get('text', '').strip()
 
         if nearby_cities:
