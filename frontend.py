@@ -129,11 +129,16 @@ def index():
                     if temp is not None:
                         temperature_info.append((nearby_city, temp))
 
-    return render_template("index.html", 
-                         city=city, 
-                         temperature_info=temperature_info, 
-                         nearby_cities=nearby_cities, 
-                         valid_city=valid_city)
+    return render_template(
+    "index.html", 
+    city=city, 
+    temperature_info=temperature_info, 
+    nearby_cities=nearby_cities, 
+    valid_city=valid_city,
+    tooCold=too_cold,
+    tooHot=too_hot
+)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

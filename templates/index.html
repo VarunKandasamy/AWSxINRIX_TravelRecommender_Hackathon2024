@@ -4,37 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .result-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .result-section p {
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            font-size: 1.2em;
+            background-color: #e1f7e1;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .error {
+            color: #ff4d4d;
+            font-size: 1.1em;
+        }
+
+        .valid {
+            color: #4CAF50;
+            font-size: 1.1em;
+        }
+    </style>
 </head>
 <body>
-    <h1>Weather Information</h1>
+    <header>
+        <h1>Weather Information</h1>
+    </header>
 
-    <form method="post">
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city" required><br><br>
+    <div class="container">
+        <form method="post">
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required><br><br>
 
-        <label for="tooHot">Too Hot (°C):</label>
-        <input type="number" id="tooHot" name="tooHot" required><br><br>
+            <label for="tooHot">Too Hot (°C):</label>
+            <input type="number" id="tooHot" name="tooHot" required><br><br>
 
-        <label for="tooCold">Too Cold (°C):</label>
-        <input type="number" id="tooCold" name="tooCold" required><br><br>
+            <label for="tooCold">Too Cold (°C):</label>
+            <input type="number" id="tooCold" name="tooCold" required><br><br>
 
-        <label for="radius">Radius (miles):</label>
-        <input type="number" id="radius" name="radius" value="5"><br><br>
+            <label for="radius">Radius (miles):</label>
+            <input type="number" id="radius" name="radius" required><br><br>
 
-        <input type="submit" value="Submit">
-    </form>
+            <input type="submit" value="Submit">
+        </form>
 
-    {% if valid_city %}
-        <p>{{ valid_city }}</p>
-    {% endif %}
+        {% if valid_city %}
+            <div class="result-section valid">
+                <p>{{ valid_city }}</p>
+            </div>
+        {% endif %}
 
-    {% if temperature_info %}
-        <h3>Nearby Cities with Temperatures:</h3>
-        <ul>
-        {% for city, temp in temperature_info %}
-            <li>{{ city }}: {{ temp }}°C</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+        {% if error %}
+            <div class="result-section error">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+
+        {% if temperature_info %}
+            <div class="result-section">
+                <h3>Nearby Cities with Temperatures in Range:</h3>
+                <ul>
+                {% for city, temp in temperature_info %}
+                    {% if temp >= tooCold and temp <= tooHot %}
+                        <li>{{ city }}: {{ temp }}°C</li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
