@@ -55,7 +55,7 @@ def get_nearby_cities(city, radius_miles):
                 {
                     "anthropic_version": "bedrock-2023-05-31",
                     "max_tokens": 1024,
-                    "system": "your output should be ONLY cities separated by commas with NO WHITESPACES",
+                    "system": "your output should be ONLY cities followed by ONE COMMA followed by the STATE name, each separated by SEMICOLONS with NO WHITESPACES in between",
                     "messages": [
                         {
                             "role": "user",
@@ -73,7 +73,7 @@ def get_nearby_cities(city, radius_miles):
 
         response_body = json.loads(response['body'].read().decode('utf-8'))
         model_output = response_body['content'][0]['text']
-        nearby_cities = model_output.split(',')
+        nearby_cities = model_output.split(';')
         return nearby_cities
 
     except Exception as e:
@@ -83,11 +83,12 @@ def get_nearby_cities(city, radius_miles):
 @app.route("/", methods=["GET", "POST"])
 def index():
     city = ""
-    temperature_info = ""
+    temperature_info = []
     nearby_cities = []
     valid_city = None
     too_hot = None
     too_cold = None
+    radius_miles = None
     
     if request.method == "POST":
         city = request.form.get("city", "").strip()
@@ -97,10 +98,9 @@ def index():
         try:
             too_hot = int(request.form.get("tooHot", ""))
             too_cold = int(request.form.get("tooCold", ""))
-            radius_miles = int(request.form.get("radius", ""))
-
+            radius_miles = int(request.form.get("radius", "5"))  # Get radius input from the form, default is 5 miles
         except ValueError:
-            return render_template("index.html", error="Please enter valid temperature values for Too Hot and Too Cold.")
+            return render_template("index.html", error="Please enter valid temperature values for Too Hot, Too Cold, and radius.")
 
         # Use current timestamp rounded to 5-minute intervals for caching
         timestamp = datetime.now().replace(second=0, microsecond=0)
@@ -112,15 +112,22 @@ def index():
             if too_cold <= temperature <= too_hot:
                 valid_city = f"The temperature in {city} is {temperature}°C, and it is within the acceptable range."
             else:
-                nearby_cities = get_nearby_cities(city, radius_miles)
+                nearby_cities = get_nearby_cities(city, radius_miles)  # Use inputted radius
                 for nearby_city in nearby_cities:
                     temp = get_cached_temperature(nearby_city, timestamp)
                     if temp is not None and too_cold <= temp <= too_hot:
-                        valid_city = f"The temperature in nearby city {nearby_city} is {temp}°C, and it is within the acceptable range."
+                        valid_city = f"The temperature in {nearby_city} is {temp}°C, and it is within the acceptable range. (Alternative city)"
                         break
 
                 if valid_city is None:
                     valid_city = "No cities in the radius work."
+
+                # Create a list of city-temperature pairs for display in HTML
+                temperature_info = []
+                for nearby_city in nearby_cities:
+                    temp = get_cached_temperature(nearby_city, timestamp)
+                    if temp is not None:
+                        temperature_info.append((nearby_city, temp))
 
     return render_template("index.html", 
                          city=city, 
