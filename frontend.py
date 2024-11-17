@@ -21,7 +21,7 @@ adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=10, pool_maxs
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 
-# Cache weather data for 5 minutes
+# Cache weather data for 5 minutes - becomes max runtime
 @lru_cache(maxsize=100)
 def get_cached_temperature(city, timestamp):
     api_key = "a335bd2b726341bc9ef24526241711"  # Replace with your WeatherAPI key
