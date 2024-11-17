@@ -14,15 +14,25 @@
         <label for="radius">Radius (miles):</label>
         <input type="number" id="radius" name="radius" value="5" required><br>
 
+        <label for="tooHot">Too Hot Temperature (°C):</label>
+        <input type="number" id="tooHot" name="tooHot" required><br>
+
+        <label for="tooCold">Too Cold Temperature (°C):</label>
+        <input type="number" id="tooCold" name="tooCold" required><br>
+
         <button type="submit">Submit</button>
     </form>
+
+    {% if valid_city %}
+        <h3>{{ valid_city }}</h3>
+    {% endif %}
 
     {% if city %}
         <h3>{{ temperature_info }}</h3>
         <h3>Nearby Cities within {{ radius }} miles:</h3>
         <ul>
-            {% for city in nearby_cities %}
-                <li>{{ city }}</li>
+            {% for nearby_city in nearby_cities %}
+                <li>{{ nearby_city }}</li>
             {% else %}
                 <li>No nearby cities found.</li>
             {% endfor %}
